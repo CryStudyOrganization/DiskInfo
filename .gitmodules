@@ -1,0 +1,3 @@
+[submodule "DiskInfo"]
+	path = DiskInfo
+	url = https://github.com/CryStudyOrganization/DiskInfo.git
