@@ -29,7 +29,7 @@ public:
     QString GetDriveSpace();                                //4
     QString GetSystemMemory();                              //5
     QString GetDeviceName();                                //6
-    QString GetUserNameW();                                  //7
+    QString GetUserNameW();                                 //7
     QString GetDirectoryInformation();                      //8
     QString WatchDirectoryChanges(const QString &path);     //9
 

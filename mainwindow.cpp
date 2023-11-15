@@ -48,6 +48,7 @@ void MainWindow::stopTracking()
     qDebug() << "Stop tracking changes in: " << watchedPath;
 }
 
+
 void MainWindow::on_directoryChanged(const QString &path)
 {
     qDebug() << "Directory changed: " << path;
@@ -57,27 +58,34 @@ void MainWindow::on_directoryChanged(const QString &path)
     QDir dir(path);
     QStringList files = dir.entryList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Time);
 
-    for (const QString &file : files) {
-        QString filePath = QDir::cleanPath(path + QDir::separator() + file);
-        QFileInfo fileInfo(filePath);
+    QFile logFile("log.txt");
+    if (logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
 
-        // Check if the file has been modified since the last check
-        if (fileTimestamps.contains(filePath) && fileInfo.lastModified() == fileTimestamps[filePath])
-            continue;
+        for (const QString &file : files) {
+            QString filePath = QDir::cleanPath(path + QDir::separator() + file);
+            QFileInfo fileInfo(filePath);
 
-        // Update the timestamp for the current file
-        fileTimestamps[filePath] = fileInfo.lastModified();
+            if (fileTimestamps.contains(filePath) && fileInfo.lastModified() == fileTimestamps[filePath])
+                continue;
 
-        changeInfo += "  File/Directory: " + fileInfo.fileName() + "\n";
-        changeInfo += "    Path: " + fileInfo.filePath() + "\n";
-        changeInfo += "    Size: " + QString::number(fileInfo.size()) + " bytes\n";
-        changeInfo += "    Last Modified: " + fileInfo.lastModified().toString("yyyy-MM-dd hh:mm:ss") + "\n";
-        changeInfo += "    Created: " + fileInfo.birthTime().toString("yyyy-MM-dd hh:mm:ss") + "\n";
-        changeInfo += "    Owner: " + fileInfo.owner() + "\n";
-        changeInfo += "    Permissions: " + QString::number(fileInfo.permissions(), 8) + "\n";
-        changeInfo += "    Is Directory: " + QString(fileInfo.isDir() ? "Yes" : "No") + "\n";
-        changeInfo += "    Is File: " + QString(fileInfo.isFile() ? "Yes" : "No") + "\n";
-        changeInfo += "    Is SymLink: " + QString(fileInfo.isSymLink() ? "Yes" : "No") + "\n";
+            fileTimestamps[filePath] = fileInfo.lastModified();
+
+            changeInfo += "  File/Directory: " + fileInfo.fileName() + "\n";
+            changeInfo += "    Path: " + fileInfo.filePath() + "\n";
+            changeInfo += "    Size: " + QString::number(fileInfo.size()) + " bytes\n";
+            changeInfo += "    Last Modified: " + fileInfo.lastModified().toString("yyyy-MM-dd hh:mm:ss") + "\n";
+            changeInfo += "    Created: " + fileInfo.birthTime().toString("yyyy-MM-dd hh:mm:ss") + "\n";
+            changeInfo += "    Owner: " + fileInfo.owner() + "\n";
+            changeInfo += "    Permissions: " + QString::number(fileInfo.permissions(), 8) + "\n";
+            changeInfo += "    Is Directory: " + QString(fileInfo.isDir() ? "Yes" : "No") + "\n";
+            changeInfo += "    Is File: " + QString(fileInfo.isFile() ? "Yes" : "No") + "\n";
+            changeInfo += "    Is SymLink: " + QString(fileInfo.isSymLink() ? "Yes" : "No") + "\n";
+
+            out << changeInfo;
+        }
+
+        logFile.close();
     }
 
     ui->logBrowser->setPlainText(changeInfo);
